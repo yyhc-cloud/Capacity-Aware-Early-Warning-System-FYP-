@@ -1,0 +1,13 @@
+@"
+# Data files (keep only on your computer)
+*.csv
+*.zip
+*.parquet
+processed/
+prepared/
+!prepared/A*.csv
+
+# System and editor files
+__pycache__/
+.ipynb_checkpoints/
+"@ | Set-Content -Path .gitignore -Encoding ascii
