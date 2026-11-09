@@ -1,0 +1,207 @@
+========================================================================
+Library versions
+  python                                 3.14.2
+  pandas                                 3.0.1
+  numpy                                  2.4.3
+  pyarrow                                26.0.1
+  scikit-learn                           1.9.1
+  matplotlib                             3.11.2
+  interpret                              0.7.8
+  fairlearn                              0.15.0
+  shap (used by interpret ShapKernel)    0.54.1
+
+Day 14: ccal rows in file = 4761, test rows in file = 9330 -> used after filtering: ccal = 0, test = 0
+Day 14: fit = 6,480 (expected 6,480), pcal = 5,077 (expected 5,077)
+Day 14: DROPPED feature 'mean_score_available' - entirely missing in fit (6,480 of 6,480 rows missing)
+Day 14: 30 features used after the all-missing rule
+Day 14: categorical features (6): ['age_band', 'gender', 'disability', 'highest_education', 'imd_band', 'region']
+
+Day 28: ccal rows in file = 4648, test rows in file = 9210 -> used after filtering: ccal = 0, test = 0
+Day 28: fit = 6,421 (expected 6,421), pcal = 4,869 (expected 4,869)
+Day 28: DROPPED feature 'mean_score_available' - entirely missing in fit (6,421 of 6,421 rows missing)
+Day 28: 30 features used after the all-missing rule
+Day 28: categorical features (6): ['age_band', 'gender', 'disability', 'highest_education', 'imd_band', 'region']
+
+Day 42: ccal rows in file = 4524, test rows in file = 9039 -> used after filtering: ccal = 0, test = 0
+Day 42: fit = 6,343 (expected 6,343), pcal = 4,794 (expected 4,794)
+Day 42: 31 features used after the all-missing rule
+Day 42: categorical features (6): ['age_band', 'gender', 'disability', 'highest_education', 'imd_band', 'region']
+
+========================================================================
+CHECKPOINT Day 14
+========================================================================
+[2] part A: n = 1,693, At-risk rate = 0.4879
+[2] part B: n = 1,693, At-risk rate = 0.4885
+[2] part C: n = 1,691, At-risk rate = 0.4885
+[2] students in more than one part: 0 (asserted)
+[3] HGB trained on 6,480 fit rows in 0.96 s
+[4] part C At-risk rate (random-model PR-AUC) = 0.4885
+[4] PR-AUC = 0.7319 | Brier (raw) = 0.2133 | ECE (raw) = 0.0610
+[5] Platt fitted on part A: slope = 0.6939, intercept = 0.2283
+[6] Brier: raw 0.2133 -> Platt 0.2095 | ECE: raw 0.0610 -> Platt 0.0280
+[6] saved pilot/reliability_T14.png
+[6b] class At risk: n_B = 827, rank k = 746, q = 0.6931, minimum probability to include = 0.3069
+[6b] class Not at risk: n_B = 866, rank k = 781, q = 0.6443, minimum probability to include = 0.3557
+[6b] part C coverage: At risk = 0.9274, Not at risk = 0.9168 (target >= 0.90)
+[6b] sets: {At risk} 0.2241 | {Not at risk} 0.1597 | ambiguous 0.6162 | empty 0.0000 | average size 1.6162
+[6b] ambiguous when P(At risk) in [0.3069, 0.6443]; 0.5 inside: True
+[7] wrapper check: identical probabilities on all 1,691 part-C rows
+[7] placeholders in explainer inputs: background 10, random rows 0, scope rows 9
+  0%|          | 0/20 [00:00<?, ?it/s]  5%|5         | 1/20 [00:01<00:35,  1.87s/it] 10%|#         | 2/20 [00:03<00:33,  1.86s/it] 15%|#5        | 3/20 [00:05<00:30,  1.78s/it] 20%|##        | 4/20 [00:07<00:28,  1.75s/it] 25%|##5       | 5/20 [00:08<00:25,  1.69s/it] 30%|###       | 6/20 [00:10<00:23,  1.64s/it] 35%|###5      | 7/20 [00:11<00:20,  1.60s/it] 40%|####      | 8/20 [00:13<00:19,  1.60s/it] 45%|####5     | 9/20 [00:14<00:17,  1.56s/it] 50%|#####     | 10/20 [00:16<00:15,  1.54s/it] 55%|#####5    | 11/20 [00:17<00:13,  1.51s/it] 60%|######    | 12/20 [00:19<00:12,  1.54s/it] 65%|######5   | 13/20 [00:20<00:10,  1.52s/it] 70%|#######   | 14/20 [00:22<00:09,  1.54s/it] 75%|#######5  | 15/20 [00:23<00:07,  1.54s/it] 80%|########  | 16/20 [00:25<00:06,  1.55s/it] 85%|########5 | 17/20 [00:27<00:04,  1.56s/it] 90%|######### | 18/20 [00:28<00:03,  1.54s/it] 95%|#########5| 19/20 [00:30<00:01,  1.55s/it]100%|##########| 20/20 [00:31<00:00,  1.62s/it]100%|##########| 20/20 [00:31<00:00,  1.60s/it]
+  0%|          | 0/20 [00:00<?, ?it/s]  5%|5         | 1/20 [00:01<00:29,  1.56s/it] 10%|#         | 2/20 [00:03<00:28,  1.61s/it] 15%|#5        | 3/20 [00:04<00:27,  1.62s/it] 20%|##        | 4/20 [00:06<00:26,  1.65s/it] 25%|##5       | 5/20 [00:08<00:24,  1.66s/it] 30%|###       | 6/20 [00:09<00:22,  1.63s/it] 35%|###5      | 7/20 [00:11<00:21,  1.62s/it] 40%|####      | 8/20 [00:12<00:19,  1.58s/it] 45%|####5     | 9/20 [00:14<00:17,  1.59s/it] 50%|#####     | 10/20 [00:15<00:15,  1.53s/it] 55%|#####5    | 11/20 [00:17<00:13,  1.52s/it] 60%|######    | 12/20 [00:19<00:13,  1.66s/it] 65%|######5   | 13/20 [00:21<00:12,  1.76s/it] 70%|#######   | 14/20 [00:22<00:09,  1.53s/it] 75%|#######5  | 15/20 [00:23<00:06,  1.36s/it] 80%|########  | 16/20 [00:24<00:04,  1.24s/it] 85%|########5 | 17/20 [00:25<00:03,  1.16s/it] 90%|######### | 18/20 [00:26<00:02,  1.14s/it] 95%|#########5| 19/20 [00:27<00:01,  1.10s/it]100%|##########| 20/20 [00:28<00:00,  1.07s/it]100%|##########| 20/20 [00:28<00:00,  1.42s/it]
+[7] ShapKernel setup 0.07 s
+[7] random 20 part-C rows: 32.04 s -> full set (9,353) estimate 4.16 h
+[7] scope: top 15 % of part C = 254 cases; 20 explained in 28.39 s = 1.419 s/case -> 1,403 test cases ~ 1,991 s = 0.55 h
+[7] fallback shap.TreeExplainer (raw HGB): 0.0015 s/case; additivity max error 2.76 log-odds (timing only; additivity FAILS (categorical splits not reproduced) - values not faithful to HGB)
+[7] example row (part-C enrolment FFF_2013B_199446), calibrated P(At risk) = 0.426, base value = 0.475
+     1. n_not_yet_due = 12: SHAP = +0.0541 (raised risk)
+     2. imd_band = 90-100%: SHAP = -0.0535 (lowered risk)
+     3. highest_education = HE Qualification: SHAP = -0.0429 (lowered risk)
+[8] flagged top 169 of 1,691 part-C enrolments (threshold P >= 0.753)
+[8] meta_disability:
+                           n  n_at_risk  recall  precision  selection_rate
+sensitive_feature_0                                                       
+N                   1530.000    739.000   0.180      0.881           0.099
+Y                    161.000     87.000   0.172      0.833           0.112
+    overall recall = 0.179, selection rate = 0.100; largest difference: recall = 0.008, selection rate = 0.013
+    small group(s) (< 100): none
+[8] meta_age_band (55<= merged into 35 and over):
+                           n  n_at_risk  recall  precision  selection_rate
+sensitive_feature_0                                                       
+0-35                1177.000    606.000   0.180      0.893           0.104
+35 and over          514.000    220.000   0.177      0.830           0.091
+    overall recall = 0.179, selection rate = 0.100; largest difference: recall = 0.003, selection rate = 0.012
+    small group(s) (< 100): none
+
+========================================================================
+CHECKPOINT Day 28
+========================================================================
+[2] part A: n = 1,623, At-risk rate = 0.4664
+[2] part B: n = 1,624, At-risk rate = 0.4661
+[2] part C: n = 1,622, At-risk rate = 0.4661
+[2] students in more than one part: 0 (asserted)
+[3] HGB trained on 6,421 fit rows in 0.55 s
+[4] part C At-risk rate (random-model PR-AUC) = 0.4661
+[4] PR-AUC = 0.7185 | Brier (raw) = 0.2152 | ECE (raw) = 0.0771
+[5] Platt fitted on part A: slope = 0.7778, intercept = 0.0256
+[6] Brier: raw 0.2152 -> Platt 0.2108 | ECE: raw 0.0771 -> Platt 0.0397
+[6] saved pilot/reliability_T28.png
+[6b] class At risk: n_B = 757, rank k = 683, q = 0.7460, minimum probability to include = 0.2540
+[6b] class Not at risk: n_B = 867, rank k = 782, q = 0.6139, minimum probability to include = 0.3861
+[6b] part C coverage: At risk = 0.9074, Not at risk = 0.8995 (target >= 0.90)
+[6b] sets: {At risk} 0.2281 | {Not at risk} 0.1911 | ambiguous 0.5808 | empty 0.0000 | average size 1.5808
+[6b] ambiguous when P(At risk) in [0.2540, 0.6139]; 0.5 inside: True
+[7] wrapper check: identical probabilities on all 1,622 part-C rows
+[7] placeholders in explainer inputs: background 3, random rows 0, scope rows 3
+  0%|          | 0/20 [00:00<?, ?it/s]  5%|5         | 1/20 [00:00<00:18,  1.04it/s] 10%|#         | 2/20 [00:01<00:17,  1.01it/s] 15%|#5        | 3/20 [00:02<00:17,  1.00s/it] 20%|##        | 4/20 [00:04<00:17,  1.07s/it] 25%|##5       | 5/20 [00:05<00:15,  1.03s/it] 30%|###       | 6/20 [00:06<00:13,  1.00it/s] 35%|###5      | 7/20 [00:06<00:12,  1.02it/s] 40%|####      | 8/20 [00:08<00:11,  1.00it/s] 45%|####5     | 9/20 [00:08<00:10,  1.04it/s] 50%|#####     | 10/20 [00:09<00:09,  1.05it/s] 55%|#####5    | 11/20 [00:10<00:08,  1.03it/s] 60%|######    | 12/20 [00:11<00:07,  1.04it/s] 65%|######5   | 13/20 [00:12<00:06,  1.07it/s] 70%|#######   | 14/20 [00:13<00:05,  1.08it/s] 75%|#######5  | 15/20 [00:14<00:04,  1.09it/s] 80%|########  | 16/20 [00:15<00:03,  1.09it/s] 85%|########5 | 17/20 [00:16<00:02,  1.10it/s] 90%|######### | 18/20 [00:17<00:01,  1.10it/s] 95%|#########5| 19/20 [00:18<00:00,  1.08it/s]100%|##########| 20/20 [00:19<00:00,  1.06it/s]100%|##########| 20/20 [00:19<00:00,  1.05it/s]
+  0%|          | 0/20 [00:00<?, ?it/s]  5%|5         | 1/20 [00:00<00:17,  1.08it/s] 10%|#         | 2/20 [00:01<00:16,  1.09it/s] 15%|#5        | 3/20 [00:02<00:15,  1.10it/s] 20%|##        | 4/20 [00:03<00:14,  1.08it/s] 25%|##5       | 5/20 [00:04<00:13,  1.09it/s] 30%|###       | 6/20 [00:05<00:12,  1.10it/s] 35%|###5      | 7/20 [00:06<00:11,  1.10it/s] 40%|####      | 8/20 [00:07<00:10,  1.11it/s] 45%|####5     | 9/20 [00:08<00:10,  1.06it/s] 50%|#####     | 10/20 [00:09<00:09,  1.07it/s] 55%|#####5    | 11/20 [00:10<00:08,  1.06it/s] 60%|######    | 12/20 [00:11<00:07,  1.07it/s] 65%|######5   | 13/20 [00:11<00:06,  1.09it/s] 70%|#######   | 14/20 [00:12<00:05,  1.06it/s] 75%|#######5  | 15/20 [00:13<00:04,  1.09it/s] 80%|########  | 16/20 [00:14<00:03,  1.09it/s] 85%|########5 | 17/20 [00:15<00:02,  1.08it/s] 90%|######### | 18/20 [00:16<00:01,  1.06it/s] 95%|#########5| 19/20 [00:17<00:00,  1.08it/s]100%|##########| 20/20 [00:18<00:00,  1.03it/s]100%|##########| 20/20 [00:18<00:00,  1.07it/s]
+[7] ShapKernel setup 0.04 s
+[7] random 20 part-C rows: 19.16 s -> full set (9,353) estimate 2.49 h
+[7] scope: top 15 % of part C = 243 cases; 20 explained in 18.72 s = 0.936 s/case -> 1,403 test cases ~ 1,313 s = 0.36 h
+[7] fallback shap.TreeExplainer (raw HGB): 0.0014 s/case; additivity max error 2.3 log-odds (timing only; additivity FAILS (categorical splits not reproduced) - values not faithful to HGB)
+[7] example row (part-C enrolment BBB_2013B_477009), calibrated P(At risk) = 0.218, base value = 0.408
+     1. highest_education = A Level or Equivalent: SHAP = -0.0528 (lowered risk)
+     2. n_not_yet_due = 10: SHAP = -0.0498 (lowered risk)
+     3. age_band = 35-55: SHAP = -0.0309 (lowered risk)
+[8] flagged top 162 of 1,622 part-C enrolments (threshold P >= 0.796)
+[8] meta_disability:
+                           n  n_at_risk  recall  precision  selection_rate
+sensitive_feature_0                                                       
+N                   1474.000    678.000   0.189      0.908           0.096
+Y                    148.000     78.000   0.256      0.952           0.142
+    overall recall = 0.196, selection rate = 0.100; largest difference: recall = 0.068, selection rate = 0.046
+    small group(s) (< 100): none
+[8] meta_age_band (55<= merged into 35 and over):
+                           n  n_at_risk  recall  precision  selection_rate
+sensitive_feature_0                                                       
+0-35                1102.000    545.000   0.218      0.922           0.117
+35 and over          520.000    211.000   0.137      0.879           0.063
+    overall recall = 0.196, selection rate = 0.100; largest difference: recall = 0.081, selection rate = 0.054
+    small group(s) (< 100): none
+
+========================================================================
+CHECKPOINT Day 42
+========================================================================
+[2] part A: n = 1,599, At-risk rate = 0.4578
+[2] part B: n = 1,597, At-risk rate = 0.4577
+[2] part C: n = 1,598, At-risk rate = 0.4581
+[2] students in more than one part: 0 (asserted)
+[3] HGB trained on 6,343 fit rows in 0.43 s
+[4] part C At-risk rate (random-model PR-AUC) = 0.4581
+[4] PR-AUC = 0.7719 | Brier (raw) = 0.1931 | ECE (raw) = 0.0523
+[5] Platt fitted on part A: slope = 0.7312, intercept = 0.0132
+[6] Brier: raw 0.1931 -> Platt 0.1899 | ECE: raw 0.0523 -> Platt 0.0184
+[6] saved pilot/reliability_T42.png
+[6b] class At risk: n_B = 731, rank k = 659, q = 0.7219, minimum probability to include = 0.2781
+[6b] class Not at risk: n_B = 866, rank k = 781, q = 0.6197, minimum probability to include = 0.3803
+[6b] part C coverage: At risk = 0.8648, Not at risk = 0.9261 (target >= 0.90)
+[6b] sets: {At risk} 0.2303 | {Not at risk} 0.2941 | ambiguous 0.4756 | empty 0.0000 | average size 1.4756
+[6b] ambiguous when P(At risk) in [0.2781, 0.6197]; 0.5 inside: True
+[7] wrapper check: identical probabilities on all 1,598 part-C rows
+[7] placeholders in explainer inputs: background 36, random rows 6, scope rows 17
+  0%|          | 0/20 [00:00<?, ?it/s]  5%|5         | 1/20 [00:00<00:18,  1.03it/s] 10%|#         | 2/20 [00:02<00:18,  1.03s/it] 15%|#5        | 3/20 [00:03<00:17,  1.00s/it] 20%|##        | 4/20 [00:04<00:15,  1.00it/s] 25%|##5       | 5/20 [00:05<00:15,  1.01s/it] 30%|###       | 6/20 [00:05<00:13,  1.02it/s] 35%|###5      | 7/20 [00:06<00:12,  1.03it/s] 40%|####      | 8/20 [00:07<00:11,  1.05it/s] 45%|####5     | 9/20 [00:08<00:10,  1.07it/s] 50%|#####     | 10/20 [00:09<00:09,  1.02it/s] 55%|#####5    | 11/20 [00:10<00:08,  1.02it/s] 60%|######    | 12/20 [00:11<00:07,  1.02it/s] 65%|######5   | 13/20 [00:12<00:06,  1.04it/s] 70%|#######   | 14/20 [00:13<00:05,  1.04it/s] 75%|#######5  | 15/20 [00:14<00:04,  1.02it/s] 80%|########  | 16/20 [00:15<00:03,  1.04it/s] 85%|########5 | 17/20 [00:16<00:02,  1.04it/s] 90%|######### | 18/20 [00:17<00:01,  1.05it/s] 95%|#########5| 19/20 [00:18<00:00,  1.06it/s]100%|##########| 20/20 [00:19<00:00,  1.06it/s]100%|##########| 20/20 [00:19<00:00,  1.03it/s]
+  0%|          | 0/20 [00:00<?, ?it/s]  5%|5         | 1/20 [00:00<00:18,  1.04it/s] 10%|#         | 2/20 [00:01<00:16,  1.09it/s] 15%|#5        | 3/20 [00:02<00:16,  1.05it/s] 20%|##        | 4/20 [00:03<00:15,  1.05it/s] 25%|##5       | 5/20 [00:04<00:14,  1.07it/s] 30%|###       | 6/20 [00:05<00:13,  1.05it/s] 35%|###5      | 7/20 [00:06<00:12,  1.07it/s] 40%|####      | 8/20 [00:07<00:11,  1.06it/s] 45%|####5     | 9/20 [00:08<00:10,  1.05it/s] 50%|#####     | 10/20 [00:09<00:09,  1.05it/s] 55%|#####5    | 11/20 [00:10<00:08,  1.02it/s] 60%|######    | 12/20 [00:11<00:07,  1.04it/s] 65%|######5   | 13/20 [00:12<00:06,  1.03it/s] 70%|#######   | 14/20 [00:13<00:05,  1.01it/s] 75%|#######5  | 15/20 [00:14<00:04,  1.02it/s] 80%|########  | 16/20 [00:15<00:03,  1.03it/s] 85%|########5 | 17/20 [00:16<00:02,  1.02it/s] 90%|######### | 18/20 [00:17<00:01,  1.04it/s] 95%|#########5| 19/20 [00:18<00:00,  1.05it/s]100%|##########| 20/20 [00:19<00:00,  1.05it/s]100%|##########| 20/20 [00:19<00:00,  1.04it/s]
+[7] ShapKernel setup 0.03 s
+[7] random 20 part-C rows: 19.37 s -> full set (9,353) estimate 2.52 h
+[7] scope: top 15 % of part C = 240 cases; 20 explained in 19.18 s = 0.959 s/case -> 1,403 test cases ~ 1,346 s = 0.37 h
+[7] fallback shap.TreeExplainer (raw HGB): 0.0014 s/case; additivity max error 3.01 log-odds (timing only; additivity FAILS (categorical splits not reproduced) - values not faithful to HGB)
+[7] example row (part-C enrolment EEE_2014B_350690), calibrated P(At risk) = 0.900, base value = 0.424
+     1. n_overdue = 1: SHAP = +0.3361 (raised risk)
+     2. days_since_last_activity = 16.0: SHAP = +0.1236 (raised risk)
+     3. n_not_yet_due = 3: SHAP = -0.0361 (lowered risk)
+[8] flagged top 160 of 1,598 part-C enrolments (threshold P >= 0.863)
+[8] meta_disability:
+                           n  n_at_risk  recall  precision  selection_rate
+sensitive_feature_0                                                       
+N                   1445.000    656.000   0.210      0.958           0.100
+Y                    153.000     76.000   0.211      1.000           0.105
+    overall recall = 0.210, selection rate = 0.100; largest difference: recall = 0.000, selection rate = 0.005
+    small group(s) (< 100): none
+[8] meta_age_band (55<= merged into 35 and over):
+                           n  n_at_risk  recall  precision  selection_rate
+sensitive_feature_0                                                       
+0-35                1077.000    523.000   0.228      0.975           0.113
+35 and over          521.000    209.000   0.167      0.921           0.073
+    overall recall = 0.210, selection rate = 0.100; largest difference: recall = 0.060, selection rate = 0.040
+    small group(s) (< 100): none
+
+========================================================================
+SUMMARY (feasibility evidence only - not final results)
+========================================================================
+ checkpoint  at_risk_rate_partC  pr_auc  brier_raw  brier_platt  ece_raw  ece_platt  train_seconds
+         14              0.4885  0.7319     0.2133       0.2095   0.0610     0.0280         0.9638
+         28              0.4661  0.7185     0.2152       0.2108   0.0771     0.0397         0.5524
+         42              0.4581  0.7719     0.1931       0.1899   0.0523     0.0184         0.4288
+
+LAC conformal sets (alpha = 0.10; thresholds on part B, evaluated on part C):
+                               0      1      2
+checkpoint                    14     28     42
+q_at_risk                 0.6931 0.7460 0.7219
+min_prob_at_risk          0.3069 0.2540 0.2781
+q_not_at_risk             0.6443 0.6139 0.6197
+min_prob_not_at_risk      0.3557 0.3861 0.3803
+coverage_at_risk          0.9274 0.9074 0.8648
+coverage_not_at_risk      0.9168 0.8995 0.9261
+prop_set_at_risk_only     0.2241 0.2281 0.2303
+prop_set_not_at_risk_only 0.1597 0.1911 0.2941
+prop_ambiguous            0.6162 0.5808 0.4756
+prop_empty                0.0000 0.0000 0.0000
+avg_set_size              1.6162 1.5808 1.4756
+ambiguous_p_low           0.3069 0.2540 0.2781
+ambiguous_p_high          0.6443 0.6139 0.6197
+half_in_ambiguous_range     True   True   True
+
+SHAP timing (Kernel SHAP on calibrated model):
+ checkpoint  kernel_seconds_per_case  kernel_scope_estimate_hours  kernel_full_set_estimate_hours  tree_seconds_per_case  tree_additivity_max_error
+         14                   1.4194                       0.5532                          4.1622                 0.0015                     2.7610
+         28                   0.9361                       0.3648                          2.4884                 0.0014                     2.3017
+         42                   0.9592                       0.3738                          2.5166                 0.0014                     3.0070
+
+PR-AUC above At-risk rate at every checkpoint: True
+PR-AUC rises monotonically Day 14 -> 28 -> 42: False (Day 14 0.7319, Day 42 0.7719)
+Day 14: Platt lowered Brier: True; lowered ECE: True; coverage >= 0.90 (At risk / Not at risk): True / True; SHAP scope estimate 0.55 h (< 2 h: True)
+Day 28: Platt lowered Brier: True; lowered ECE: True; coverage >= 0.90 (At risk / Not at risk): True / False; SHAP scope estimate 0.36 h (< 2 h: True)
+Day 42: Platt lowered Brier: True; lowered ECE: True; coverage >= 0.90 (At risk / Not at risk): False / True; SHAP scope estimate 0.37 h (< 2 h: True)
+
+ccal / test rows used: 0 at every checkpoint (asserted). Hyperparameters: sklearn defaults, not tuned. alpha fixed at 0.10. No routing applied.
+Outputs written to pilot/

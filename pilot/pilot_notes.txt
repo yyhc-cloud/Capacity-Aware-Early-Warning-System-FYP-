@@ -1,0 +1,32 @@
+Pilot notes (feasibility evidence only - not final results)
+
+Data-handling note:
+  An early exploratory check displayed label and group counts across all partitions;
+  these were not used in any modelling decision.
+
+Decisions not covered by the original rules:
+  - Features entirely missing in the fit rows at a checkpoint are dropped at that
+    checkpoint (decided from fit only; constant features kept). See dropped_features.csv.
+  - pcal split: StratifiedGroupKFold(3); the three folds' test sets, in the order the
+    splitter yields them, are parts A (Platt), B (LAC thresholds), C (evaluation).
+  - Platt scaling uses LogisticRegression with sklearn default settings (L2, C = 1.0).
+  - LAC: inclusion uses '>=' (label c in set if its probability >= 1 - q_c); the
+    ambiguous range is 1 - q_At-risk <= P(At risk) <= q_Not-at-risk.
+  - Fairlearn top 10 %: k = round(0.10 x n_partC); ties keep part-C row order.
+  - Age band: 55<= merged with 35-55 into '35 and over' for Fairlearn only.
+  - SHAP scope: top 15 % of part C (k = round(0.15 x n_partC), ties keep part-C order)
+    as a stand-in for staff-action cases; 20 of them sampled with random_state=42.
+    Test-scope estimate uses round(0.15 x 9,353) = 1,403 cases.
+  - SHAP timing: explain_local time only; explainer set-up timed separately and not
+    included in the estimates. KernelExplainer nsamples left at shap default.
+  - SHAP input (approved): ShapKernel rejects missing values, so placeholders are used
+    ONLY inside the explainer's inputs: missing category code -> -1, missing
+    days_since_last_activity / mean_score_available -> -999. The wrapper converts them
+    back to genuine missing values before predict_calibrated; no real value equals a
+    placeholder (asserted); wrapper and predict_calibrated agree exactly on all part-C
+    rows (asserted). Placeholders are reported as 'missing'. All features are declared
+    'continuous' to InterpretML (it casts everything to float64 regardless).
+  - Tree-explainer fallback (timing only): shap.TreeExplainer on the raw HGB with
+    category codes (InterpretML ShapTree is in interpret.greybox and wraps the same
+    shap TreeExplainer). Additivity against HGB log-odds is reported.
+  - pcal category values unseen in fit are set to missing.
