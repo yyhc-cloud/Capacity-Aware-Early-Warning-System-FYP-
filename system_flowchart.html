@@ -1,0 +1,372 @@
+<title>Capacity-Aware Early-Warning Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one tall system diagram in a scrollable frame, short header and legend above, a caption below. */
+:root {
+  --bg: #f5f6f8; --fg: #1c2330; --muted: #5a6473; --card: #ffffff; --line: #a3adbb; --arrow: #3b4555;
+  --s1: #3a6db3; --s1t: #e9f0fa; --s2: #4a8850; --s2t: #ebf4ec; --s3: #b3742b; --s3t: #fbf2e6;
+  --s4: #6c56b5; --s4t: #f1edfa; --s5: #2c877b; --s5t: #e8f4f2; --s6: #4e6a90; --s6t: #edf1f6;
+  --dec: #2c5ea6; --dect: #e7eefa; --cand: #bd4858; --candt: #fbeaed; --rev: #b9831c; --revt: #fcf3e0;
+  --def: #3a7cc0; --deft: #e6f0fb; --mon: #747e8d; --mont: #eff1f4;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #14171c; --fg: #e5e9ef; --muted: #9aa4b2; --card: #1d222a; --line: #4b5563; --arrow: #b6c0cd;
+  --s1: #6e9ee0; --s1t: #1a2536; --s2: #78b77d; --s2t: #1a291d; --s3: #dfa45c; --s3t: #2c2318;
+  --s4: #a491e5; --s4t: #231e34; --s5: #5ebfb1; --s5t: #162927; --s6: #8ba3c5; --s6t: #1b222e;
+  --dec: #79a6e6; --dect: #1a2437; --cand: #e3808e; --candt: #33191e; --rev: #e2b65a; --revt: #2f2619;
+  --def: #78ade6; --deft: #182638; --mon: #a3acb8; --mont: #23272e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #14171c; --fg: #e5e9ef; --muted: #9aa4b2; --card: #1d222a; --line: #4b5563; --arrow: #b6c0cd;
+  --s1: #6e9ee0; --s1t: #1a2536; --s2: #78b77d; --s2t: #1a291d; --s3: #dfa45c; --s3t: #2c2318;
+  --s4: #a491e5; --s4t: #231e34; --s5: #5ebfb1; --s5t: #162927; --s6: #8ba3c5; --s6t: #1b222e;
+  --dec: #79a6e6; --dect: #1a2437; --cand: #e3808e; --candt: #33191e; --rev: #e2b65a; --revt: #2f2619;
+  --def: #78ade6; --deft: #182638; --mon: #a3acb8; --mont: #23272e; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); }
+.wrap { max-width: 1060px; margin: 0 auto; padding-block: 28px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 18px; }
+header { display: grid; gap: 6px; }
+h1 { font-size: 1.5rem; font-weight: 600; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+.sub { margin: 0; color: var(--muted); max-width: 68ch; line-height: 1.5; font-size: 0.92rem; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.8rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 18px; height: 12px; border-radius: 3px; border: 1.5px solid; display: inline-block; }
+.sw.dia { width: 12px; height: 12px; border-radius: 1px; transform: rotate(45deg); }
+.frame { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.frame svg { display: block; width: 100%; min-width: 880px; height: auto; }
+.cap { font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin: 0; max-width: 90ch; }
+code { font-family: var(--mono); font-size: 0.95em; }
+
+/* SVG styling */
+svg text { font-family: var(--sans); fill: var(--fg); font-size: 12px; }
+svg .h { font-size: 14.5px; font-weight: 600; }
+svg .hs { font-size: 12.5px; font-weight: 600; }
+svg .sm { font-size: 10.5px; fill: var(--muted); }
+svg .mono { font-family: var(--mono); font-size: 10.5px; }
+svg .yn { font-size: 10.5px; font-weight: 600; fill: var(--dec); }
+svg .c { text-anchor: middle; }
+.st1 { fill: var(--s1t); stroke: var(--s1); } .st2 { fill: var(--s2t); stroke: var(--s2); }
+.st3 { fill: var(--s3t); stroke: var(--s3); } .st4 { fill: var(--s4t); stroke: var(--s4); }
+.st5 { fill: var(--s5t); stroke: var(--s5); } .st6 { fill: var(--s6t); stroke: var(--s6); }
+.stage { stroke-width: 1.5; }
+.card { fill: var(--card); stroke: var(--line); stroke-width: 1; }
+.lac { fill: var(--s4t); stroke: var(--s4); stroke-width: 1.6; }
+.dec { fill: var(--dect); stroke: var(--dec); stroke-width: 1.3; }
+.cand { fill: var(--candt); stroke: var(--cand); stroke-width: 1.3; }
+.setc { fill: var(--card); stroke: var(--s4); stroke-width: 1.2; }
+.start { fill: var(--card); stroke: var(--s5); stroke-width: 1.6; }
+.rank { fill: var(--s4t); stroke: var(--s4); stroke-width: 1.4; }
+.o-con { fill: var(--candt); stroke: var(--cand); stroke-width: 1.3; }
+.o-rev { fill: var(--revt); stroke: var(--rev); stroke-width: 1.3; }
+.o-wait { fill: var(--card); stroke: var(--fg); stroke-width: 1.3; }
+.o-def { fill: var(--deft); stroke: var(--def); stroke-width: 1.3; stroke-dasharray: 4 3; }
+.o-mon { fill: var(--mont); stroke: var(--mon); stroke-width: 1.3; stroke-dasharray: 4 3; }
+.edge { fill: none; stroke: var(--arrow); stroke-width: 1.4; marker-end: url(#ah); }
+.edge.loop { stroke-dasharray: 5 4; }
+.line { fill: none; stroke: var(--arrow); stroke-width: 1.4; }
+.ahead { fill: var(--arrow); }
+.chip { stroke-width: 1.2; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Capacity-Aware Early-Warning Flow</h1>
+    <p class="sub">How each OULAD enrolment moves from checkpoint data to a calibrated risk score, a conformal prediction set and a routed action under fixed staff capacity. The routing block follows the rules in <code>routing_engine.py</code>.</p>
+    <div class="legend" aria-label="Legend">
+      <span><i class="sw" style="background:var(--card);border-color:var(--line)"></i>Process</span>
+      <span><i class="sw dia" style="background:var(--dect);border-color:var(--dec)"></i>Decision</span>
+      <span><i class="sw" style="background:var(--candt);border-color:var(--cand)"></i>Candidate for a place</span>
+      <span><i class="sw" style="background:var(--card);border-color:var(--fg)"></i>Waiting (no place)</span>
+      <span><i class="sw" style="background:var(--mont);border-color:var(--mon);border-style:dashed"></i>Status set directly by the route</span>
+    </div>
+  </header>
+
+  <div class="frame">
+  <svg viewBox="0 0 1000 1690" role="img" aria-labelledby="ft">
+    <title id="ft">System flowchart: data preparation, model training and calibration, prediction and explanation, conformal uncertainty, capacity-aware routing, and evaluation.</title>
+    <defs>
+      <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path class="ahead" d="M0,0 L10,5 L0,10 z"/>
+      </marker>
+    </defs>
+
+    <!-- ============ 1. Data preparation ============ -->
+    <rect class="stage st1" x="20" y="20" width="310" height="250" rx="10"/>
+    <text class="h" x="36" y="46">1 · Data preparation (OULAD)</text>
+    <text x="36" y="70">
+      <tspan x="36" dy="0">• Unit: one enrolment (module,</tspan>
+      <tspan x="36" dy="16">   presentation, student)</tspan>
+      <tspan x="36" dy="16">• At risk = Fail or Withdrawn</tspan>
+      <tspan x="36" dy="16">• Checkpoints: end of Day 14, 28, 42</tspan>
+      <tspan x="36" dy="16">   (Weeks 2, 4, 6); only data dated ≤ T</tspan>
+      <tspan x="36" dy="16">• Eligible: registered by T and not</tspan>
+      <tspan x="36" dy="16">   yet unregistered</tspan>
+      <tspan x="36" dy="16">• Scores visible only after marking</tspan>
+      <tspan x="36" dy="16">   (TMA +14 days, CMA +7 days)</tspan>
+      <tspan x="36" dy="16">• 31 features (30 at Weeks 2 and 4)</tspan>
+    </text>
+    <!-- partitions -->
+    <rect class="chip card" x="33" y="230" width="70" height="32" rx="5" style="stroke:var(--s1)"/>
+    <text class="c hs" x="68" y="243" style="font-size:10.5px">Fitting</text><text class="c mono" x="68" y="256">2013J</text>
+    <rect class="chip card" x="107" y="230" width="70" height="32" rx="5" style="stroke:var(--s1)"/>
+    <text class="c hs" x="142" y="243" style="font-size:10.5px">Prob. cal.</text><text class="c mono" x="142" y="256">2013B/14B</text>
+    <rect class="chip card" x="181" y="230" width="70" height="32" rx="5" style="stroke:var(--s1)"/>
+    <text class="c hs" x="216" y="243" style="font-size:10.5px">Conf. cal.</text><text class="c mono" x="216" y="256">2014B</text>
+    <rect class="chip card" x="255" y="230" width="70" height="32" rx="5" style="stroke:var(--s1)"/>
+    <text class="c hs" x="290" y="243" style="font-size:10.5px">Test</text><text class="c mono" x="290" y="256">2014J</text>
+
+    <path class="edge" d="M330,145 H343"/>
+
+    <!-- ============ 2. Model training and calibration ============ -->
+    <rect class="stage st2" x="345" y="20" width="310" height="250" rx="10"/>
+    <text class="h" x="361" y="46">2 · Model training and calibration</text>
+    <rect class="card" x="365" y="64" width="270" height="74" rx="7"/>
+    <text class="c" x="500" y="88">Train HGB (main) and LR (comparison)</text>
+    <text class="c" x="500" y="105">one model per checkpoint</text>
+    <text class="c sm" x="500" y="122">on the fitting partition</text>
+    <path class="edge" d="M500,138 V164"/>
+    <rect class="card" x="365" y="166" width="270" height="84" rx="7"/>
+    <text class="c" x="500" y="192">Platt (sigmoid) calibration</text>
+    <text class="c sm" x="500" y="211">fitted on the probability-</text>
+    <text class="c sm" x="500" y="226">calibration partition</text>
+
+    <path class="edge" d="M655,145 H668"/>
+
+    <!-- ============ 3. Prediction and explanation ============ -->
+    <rect class="stage st3" x="670" y="20" width="310" height="250" rx="10"/>
+    <text class="h" x="686" y="46">3 · Prediction and explanation</text>
+    <rect class="card" x="690" y="64" width="270" height="74" rx="7"/>
+    <text class="c" x="825" y="88">Calibrated probability p</text>
+    <text class="c" x="825" y="105">of failing or withdrawing</text>
+    <text class="c sm" x="825" y="122">for each eligible enrolment</text>
+    <path class="edge" d="M825,138 V164"/>
+    <rect class="card" x="690" y="166" width="270" height="84" rx="7"/>
+    <text class="c" x="825" y="192">Decision reason for every case</text>
+    <text class="c sm" x="825" y="211">InterpretML Kernel SHAP for</text>
+    <text class="c sm" x="825" y="226">Contact, Review and Waiting cases</text>
+
+    <path class="edge" d="M825,270 V298"/>
+
+    <!-- ============ 4. Uncertainty estimation ============ -->
+    <rect class="stage st4" x="20" y="300" width="960" height="150" rx="10"/>
+    <text class="h" x="36" y="326">4 · Uncertainty estimation: class-conditional split LAC, α = 0.10</text>
+    <rect class="card" x="40" y="342" width="290" height="94" rx="7"/>
+    <text class="hs" x="54" y="362">Input per enrolment</text>
+    <text x="54" y="381">
+      <tspan x="54" dy="0">• Calibrated probability p</tspan>
+      <tspan x="54" dy="17">• Per-class thresholds for each</tspan>
+      <tspan x="54" dy="16">   checkpoint, from the conformal-</tspan>
+      <tspan x="54" dy="16">   calibration partition</tspan>
+    </text>
+    <path class="edge" d="M330,389 H368"/>
+    <rect class="lac" x="370" y="352" width="260" height="74" rx="8"/>
+    <text class="c hs" x="500" y="381">Class-conditional split LAC</text>
+    <text class="c sm" x="500" y="399">Least Ambiguous Set-valued</text>
+    <text class="c sm" x="500" y="414">Classifier</text>
+    <path class="edge" d="M630,389 H668"/>
+    <rect class="card" x="670" y="342" width="290" height="96" rx="7"/>
+    <text class="hs" x="684" y="362">Prediction set per enrolment</text>
+    <text x="684" y="381">
+      <tspan x="684" dy="0">• {At risk}</tspan>
+      <tspan x="684" dy="16">• {Not at risk}</tspan>
+      <tspan x="684" dy="16">• {At risk, Not at risk}  (ambiguous)</tspan>
+      <tspan x="684" dy="16">• { }  (empty set)</tspan>
+    </text>
+
+    <path class="edge" d="M500,450 V478"/>
+
+    <!-- ============ 5. Routing ============ -->
+    <rect class="stage st5" x="20" y="480" width="960" height="952" rx="10"/>
+    <text class="h" x="36" y="506">5 · Capacity-aware sequential routing: each module, at each checkpoint t = Week 2, 4, 6</text>
+
+    <!-- start -->
+    <rect class="start" x="290" y="530" width="280" height="40" rx="20"/>
+    <text class="c hs" x="430" y="555">Eligible enrolment at checkpoint t</text>
+    <path class="edge" d="M430,570 V612"/>
+
+    <!-- D1 contacted before? -->
+    <polygon class="dec" points="430,614 530,650 430,686 330,650"/>
+    <text class="c" x="430" y="647">Contacted</text><text class="c" x="430" y="662">before?</text>
+    <path class="edge" d="M530,650 H633"/><text class="yn" x="568" y="643">Yes</text>
+
+    <!-- D2 reviewed before? -->
+    <polygon class="dec" points="720,616 805,650 720,684 635,650"/>
+    <text class="c" x="720" y="647">Reviewed</text><text class="c" x="720" y="662">before?</text>
+    <path class="edge" d="M805,650 H828"/><text class="yn" x="806" y="642">Yes</text>
+    <rect class="o-mon" x="830" y="628" width="140" height="44" rx="6"/>
+    <text class="c" x="900" y="646">No new action</text>
+    <text class="c sm" x="900" y="662">contacted and reviewed</text>
+    <path class="edge" d="M720,684 V716"/><text class="yn" x="726" y="704">No</text>
+
+    <!-- D3 p >= 0.5 (contacted) -->
+    <polygon class="dec" points="720,718 795,750 720,782 645,750"/>
+    <text class="c" x="720" y="754">p ≥ 0.5?</text>
+    <path class="edge" d="M795,750 H828"/><text class="yn" x="801" y="743">Yes</text>
+    <rect class="cand" x="830" y="728" width="140" height="44" rx="6"/>
+    <text class="c" x="900" y="746">Follow-up candidate</text>
+    <text class="c sm" x="900" y="762">leftover Review places</text>
+    <path class="edge" d="M720,782 V804"/><text class="yn" x="726" y="798">No</text>
+    <rect class="o-mon" x="660" y="806" width="120" height="34" rx="6"/>
+    <text class="c" x="720" y="827">Monitor</text>
+
+    <!-- Rules panel -->
+    <rect class="card" x="40" y="596" width="255" height="250" rx="8" style="stroke-dasharray:4 3"/>
+    <text class="hs" x="54" y="618">Selection rules</text>
+    <text x="54" y="640" style="font-size:11.5px">
+      <tspan x="54" dy="0">• Contacted at most once</tspan>
+      <tspan x="54" dy="16.5">• Reviewed at most once; a reviewed</tspan>
+      <tspan x="54" dy="16.5">   enrolment is never a Review</tspan>
+      <tspan x="54" dy="16.5">   candidate again</tspan>
+      <tspan x="54" dy="16.5">• Persistent = {At risk} or ambiguous</tspan>
+      <tspan x="54" dy="16.5">   set at this and the previous</tspan>
+      <tspan x="54" dy="16.5">   checkpoint</tspan>
+      <tspan x="54" dy="16.5">• Capacity per module: K_t contacts</tspan>
+      <tspan x="54" dy="16.5">   and R_t reviews per checkpoint;</tspan>
+      <tspan x="54" dy="16.5">   B unique contacts over Weeks 2–6</tspan>
+      <tspan x="54" dy="16.5">• Pilot setting: K = 10, R = 5, B = 25</tspan>
+    </text>
+
+    <!-- D4 prediction set -->
+    <path class="edge" d="M430,686 V722"/><text class="yn" x="436" y="708">No</text>
+    <polygon class="dec" points="430,724 535,760 430,796 325,760"/>
+    <text class="c" x="430" y="756">Which prediction</text><text class="c" x="430" y="771">set?</text>
+    <path class="line" d="M430,796 V860"/>
+    <path class="line" d="M110,860 H860"/>
+    <path class="edge" d="M110,860 V878"/><path class="edge" d="M270,860 V878"/>
+    <path class="edge" d="M500,860 V878"/><path class="edge" d="M860,860 V878"/>
+
+    <!-- set chips -->
+    <rect class="setc" x="55" y="880" width="110" height="30" rx="15"/><text class="c hs" x="110" y="899">{At risk}</text>
+    <rect class="setc" x="215" y="880" width="110" height="30" rx="15"/><text class="c hs" x="270" y="899">{ } empty set</text>
+    <rect class="setc" x="410" y="880" width="180" height="30" rx="15"/><text class="c hs" x="500" y="899">{At risk, Not at risk}</text>
+    <rect class="setc" x="800" y="880" width="120" height="30" rx="15"/><text class="c hs" x="860" y="899">{Not at risk}</text>
+
+    <path class="edge" d="M110,910 V943"/>
+    <rect class="cand" x="45" y="945" width="130" height="40" rx="6"/><text class="c hs" x="110" y="970">Contact candidate</text>
+    <path class="edge" d="M270,910 V943"/>
+    <rect class="cand" x="205" y="945" width="130" height="40" rx="6"/><text class="c hs" x="270" y="970">Review candidate</text>
+    <path class="edge" d="M860,910 V943"/>
+    <rect class="o-mon" x="800" y="945" width="120" height="40" rx="6"/><text class="c" x="860" y="970">Monitor</text>
+
+    <!-- D5 high risk -->
+    <path class="edge" d="M500,910 V929"/>
+    <polygon class="dec" points="500,931 580,965 500,999 420,965"/>
+    <text class="c" x="500" y="961">High risk?</text><text class="c sm" x="500" y="976" style="fill:var(--fg)">(p ≥ 0.5)</text>
+    <path class="edge" d="M420,965 H337"/><text class="yn" x="360" y="958">Yes</text>
+    <path class="edge" d="M500,999 V1028"/><text class="yn" x="506" y="1018">No</text>
+
+    <!-- D6 week 6 -->
+    <polygon class="dec" points="500,1030 562,1060 500,1090 438,1060"/>
+    <text class="c" x="500" y="1064">Week 6?</text>
+    <path class="edge" d="M500,1090 V1123"/><text class="yn" x="506" y="1110">No</text>
+    <rect class="o-def" x="425" y="1125" width="150" height="40" rx="6"/>
+    <text class="c" x="500" y="1142">Defer</text><text class="c sm" x="500" y="1157">reassess next checkpoint</text>
+    <path class="edge" d="M562,1060 H608"/><text class="yn" x="572" y="1052">Yes</text>
+
+    <!-- D7 persistent -->
+    <polygon class="dec" points="690,1028 770,1060 690,1092 610,1060"/>
+    <text class="c" x="690" y="1057">Persistent</text><text class="c" x="690" y="1072">risk?</text>
+    <path class="edge" d="M690,1092 V1118"/><text class="yn" x="696" y="1110">Yes</text>
+    <rect class="cand" x="620" y="1120" width="140" height="40" rx="6"/><text class="c hs" x="690" y="1145">Review candidate</text>
+    <path class="edge" d="M770,1060 H788"/><text class="yn" x="771" y="1052">No</text>
+    <rect class="o-mon" x="790" y="1040" width="130" height="40" rx="6"/>
+    <text class="c" x="855" y="1057">Monitor</text><text class="c sm" x="855" y="1072">uncertainty flag</text>
+
+    <!-- candidate lines into the ranking step -->
+    <path class="edge" d="M110,985 V1198"/>
+    <path class="edge" d="M270,985 V1198"/>
+    <path class="edge" d="M690,1160 V1198"/>
+    <path class="edge" d="M950,772 V1198"/>
+
+    <!-- Rank and allocate -->
+    <rect class="rank" x="40" y="1200" width="920" height="110" rx="8"/>
+    <text class="c hs" x="500" y="1222" style="font-size:13.5px">Rank candidates and allocate places (per module)</text>
+    <text x="60" y="1244">
+      <tspan x="60" dy="0">• Contact: rank by persistent risk, then p; places = min(K_t, B − contacts already made in the module)</tspan>
+      <tspan x="60" dy="17">• Review: new candidates first, ranked by p, then persistent risk; places = R_t</tspan>
+      <tspan x="60" dy="17">• Follow-up: only Review places left over, ranked by p; none left → Monitor (no follow-up place)</tspan>
+      <tspan x="60" dy="17">• Candidates beyond capacity → Contact Waiting or Review Waiting; unused places are not carried over</tspan>
+    </text>
+
+    <path class="edge" d="M102,1310 V1333"/><path class="edge" d="M234,1310 V1333"/>
+    <path class="edge" d="M366,1310 V1333"/><path class="edge" d="M498,1310 V1333"/>
+
+    <!-- Outcomes -->
+    <rect class="o-con" x="40" y="1335" width="124" height="46" rx="6"/>
+    <text class="c hs" x="102" y="1355">Contact</text><text class="c sm" x="102" y="1371">within K_t and B</text>
+    <rect class="o-wait" x="172" y="1335" width="124" height="46" rx="6"/>
+    <text class="c hs" x="234" y="1355">Contact Waiting</text><text class="c sm" x="234" y="1371">no contact place</text>
+    <rect class="o-rev" x="304" y="1335" width="124" height="46" rx="6"/>
+    <text class="c hs" x="366" y="1355">Review</text><text class="c sm" x="366" y="1371">within R_t</text>
+    <rect class="o-wait" x="436" y="1335" width="124" height="46" rx="6"/>
+    <text class="c hs" x="498" y="1355">Review Waiting</text><text class="c sm" x="498" y="1371">no review place</text>
+    <rect class="o-def" x="568" y="1335" width="124" height="46" rx="6"/>
+    <text class="c hs" x="630" y="1355">Defer</text><text class="c sm" x="630" y="1371">next checkpoint</text>
+    <rect class="o-mon" x="700" y="1335" width="124" height="46" rx="6"/>
+    <text class="c hs" x="762" y="1355">Monitor</text><text class="c sm" x="762" y="1371">incl. uncertainty flag</text>
+    <rect class="o-mon" x="832" y="1335" width="124" height="46" rx="6"/>
+    <text class="c hs" x="894" y="1355">No new action</text><text class="c sm" x="894" y="1371">already served</text>
+
+    <!-- loop back to next checkpoint -->
+    <path class="edge loop" d="M40,1358 H30 V550 H288"/>
+    <text class="sm" transform="rotate(-90 44 1100)" x="44" y="1100" style="text-anchor:middle">Next checkpoint</text>
+
+    <text class="c sm" x="500" y="1404" style="fill:var(--fg)">Waiting and deferred cases are routed again at the next checkpoint. Unserved due to capacity: a Contact or Review candidate who was never</text>
+    <text class="c sm" x="500" y="1419" style="fill:var(--fg)">given a place and was not reached by Week 6, including students who withdrew while waiting.</text>
+
+    <path class="edge" d="M500,1432 V1460"/>
+
+    <!-- ============ 6. Evaluation ============ -->
+    <rect class="stage st6" x="20" y="1462" width="960" height="210" rx="10"/>
+    <text class="h" x="36" y="1488">6 · Evaluation and fairness audit (test partition, evaluated once)</text>
+
+    <rect class="card" x="40" y="1500" width="225" height="160" rx="7"/>
+    <text class="hs" x="54" y="1522">Model and uncertainty</text>
+    <text x="54" y="1544">
+      <tspan x="54" dy="0">• Precision, recall, PR-AUC</tspan>
+      <tspan x="54" dy="17">• Brier score, ECE,</tspan>
+      <tspan x="54" dy="17">   reliability diagrams</tspan>
+      <tspan x="54" dy="17">• Class-conditional coverage</tspan>
+      <tspan x="54" dy="17">• Ambiguity rate, set size</tspan>
+    </text>
+
+    <rect class="card" x="275" y="1500" width="225" height="160" rx="7"/>
+    <text class="hs" x="289" y="1522">Decision effectiveness</text>
+    <text x="289" y="1544">
+      <tspan x="289" dy="0">• Proposed policy vs five</tspan>
+      <tspan x="289" dy="17">   reference methods</tspan>
+      <tspan x="289" dy="17">• Same K_t, R_t, B for all</tspan>
+      <tspan x="289" dy="17">• At risk reached by Weeks 2, 4, 6</tspan>
+      <tspan x="289" dy="17">• False-positive contacts</tspan>
+      <tspan x="289" dy="17">   and reviews</tspan>
+    </text>
+
+    <rect class="card" x="510" y="1500" width="225" height="160" rx="7"/>
+    <text class="hs" x="524" y="1522">Delay and capacity</text>
+    <text x="524" y="1544">
+      <tspan x="524" dy="0">• Delay type: none, uncertainty,</tspan>
+      <tspan x="524" dy="17">   capacity, combined</tspan>
+      <tspan x="524" dy="17">• Unserved due to capacity;</tspan>
+      <tspan x="524" dy="17">   never selected</tspan>
+      <tspan x="524" dy="17">• Follow-up Reviews after contact</tspan>
+      <tspan x="524" dy="17">• Places used and unused</tspan>
+    </text>
+
+    <rect class="card" x="745" y="1500" width="215" height="160" rx="7"/>
+    <text class="hs" x="759" y="1522">Fairness and sensitivity</text>
+    <text x="759" y="1544">
+      <tspan x="759" dy="0">• Disability; age band</tspan>
+      <tspan x="759" dy="17">   (0–35, 35 and over)</tspan>
+      <tspan x="759" dy="17">• Signed differences with</tspan>
+      <tspan x="759" dy="17">   student-level bootstrap CIs</tspan>
+      <tspan x="759" dy="17">• Sensitivity: marking delay,</tspan>
+      <tspan x="759" dy="17">   cutoff, α, capacity K, R, B</tspan>
+    </text>
+  </svg>
+  </div>
+
+  <p class="cap">Partitions are whole module presentations, and each student appears in one partition only. The routing block shows the proposed method. The five reference methods (rule-based alerts, Top-K, threshold deferral, conformal without persistence, conformal without separate Waiting) share the same capacity limits and repeat-selection rules. Review places go to new candidates first; a contacted student still at p ≥ 0.5 gets a follow-up Review only from places left over.</p>
+</div>

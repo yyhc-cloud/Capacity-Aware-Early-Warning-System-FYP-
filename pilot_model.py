@@ -180,7 +180,7 @@ for t in CHECKPOINTS:
     if len(fit) != exp_fit or len(pcal) != exp_pcal:
         fail(f"Day {t}: row counts do not match the expected values")
 
-    # General rule (approved by the user): drop any feature that is ENTIRELY missing in the
+    # General rule: drop any feature that is ENTIRELY missing in the
     # fit rows at this checkpoint (decided from fit only). Such a column carries no
     # information and makes sklearn 1.9.1's HGB binning crash. Constant features are kept.
     all_missing = [c for c in features if fit[c].isna().all()]
@@ -392,7 +392,7 @@ for t in CHECKPOINTS:
     cats = d["categories"]
 
     # InterpretML's ShapKernel rejects ANY missing value in its input, although HGB
-    # handles them. Approved fix: placeholders ONLY inside the explainer's inputs.
+    # handles them. Fix: placeholders ONLY inside the explainer's inputs.
     #   * missing category code (imd_band, or any categorical) -> -1  (real codes are >= 0)
     #   * missing days_since_last_activity / mean_score_available -> -999
     # The wrapper turns every placeholder back into a genuine missing value before calling
@@ -403,7 +403,7 @@ for t in CHECKPOINTS:
     NUM_PLACEHOLDER_COLS = [c for c in ["days_since_last_activity", "mean_score_available"]
                             if c in features]   # mean_score_available is dropped at Day 14/28
 
-    # Condition 3: no real value may equal a placeholder (checked on fit + pcal rows).
+    # Check: no real value may equal a placeholder (checked on fit + pcal rows).
     for c in NUM_PLACEHOLDER_COLS:
         n_clash = int((X_fit[c] == NUM_PLACEHOLDER).sum() + (pcal[c] == NUM_PLACEHOLDER).sum())
         if n_clash:
@@ -427,7 +427,7 @@ for t in CHECKPOINTS:
                 out[:, j] = col
         if np.isnan(out).any():
             bad = [features[j] for j in np.where(np.isnan(out).any(axis=0))[0]]
-            fail(f"Day {t}: missing values in features without an approved placeholder: {bad}")
+            fail(f"Day {t}: missing values in features without a defined placeholder: {bad}")
         return out
 
     def from_codes(A):
@@ -455,7 +455,7 @@ for t in CHECKPOINTS:
         p1 = predict_calibrated(from_codes(A))
         return np.column_stack([1 - p1, p1])
 
-    # Condition 5: wrapper and predict_calibrated must agree on ALL part-C rows.
+    # Check: wrapper and predict_calibrated must agree on ALL part-C rows.
     p_wrap = explainer_predict(to_codes(X_c))[:, 1]
     n_diff = int((p_cal_c != p_wrap).sum())
     if n_diff:
@@ -466,7 +466,7 @@ for t in CHECKPOINTS:
     def n_missing(X):
         return int(sum(X[c].isna().sum() for c in features))
 
-    # Condition 4: same random sampling rule (100 fit rows, 20 evaluation rows, seed 42).
+    # Same random sampling rule (100 fit rows, 20 evaluation rows, seed 42).
     background = X_fit.sample(n=N_BACKGROUND, random_state=RANDOM_STATE)
     explain_rows = X_c.sample(n=N_EXPLAIN, random_state=RANDOM_STATE)
 
@@ -485,7 +485,7 @@ for t in CHECKPOINTS:
                                feature_names=features,
                                feature_types=["continuous"] * len(features))
         shap_init_seconds = time.perf_counter() - t0
-        # (a) random 20 part-C rows -> full-test-set estimate (as before)
+        # (a) random 20 part-C rows -> full-test-set estimate
         t0 = time.perf_counter()
         explanation = explainer.explain_local(to_codes(explain_rows))
         shap_seconds_20 = time.perf_counter() - t0
@@ -493,7 +493,7 @@ for t in CHECKPOINTS:
         t0 = time.perf_counter()
         explainer.explain_local(to_codes(scope_explain))
         scope_seconds_20 = time.perf_counter() - t0
-    except Exception as e:  # rule: report and stop, do not switch explainer
+    except Exception as e:  # report the error and stop; no fallback explainer
         fail(f"Day {t}: ShapKernel failed with {type(e).__name__}: {e}")
 
     shap_estimate_hours = shap_seconds_20 / N_EXPLAIN * N_TEST_FINAL / 3600
@@ -558,7 +558,7 @@ for t in CHECKPOINTS:
           f"base value = {ex0['extra']['scores'][0]:.3f}")
     for rank, j in enumerate(order, start=1):
         val = row0[features[j]]
-        val = "missing" if pd.isna(val) else val       # condition 6: never show placeholders
+        val = "missing" if pd.isna(val) else val       # never show placeholders
         direction = "raised risk" if shap_vals[j] > 0 else "lowered risk"
         print(f"     {rank}. {features[j]} = {val}: SHAP = {shap_vals[j]:+.4f} ({direction})")
         shap_rows.append(dict(checkpoint=t, rank=rank, feature=features[j], value=val,
@@ -672,7 +672,7 @@ with open(os.path.join(OUT_DIR, "pilot_notes.txt"), "w", encoding="utf-8") as f:
         "    Test-scope estimate uses round(0.15 x 9,353) = 1,403 cases.\n"
         "  - SHAP timing: explain_local time only; explainer set-up timed separately and not\n"
         "    included in the estimates. KernelExplainer nsamples left at shap default.\n"
-        "  - SHAP input (approved): ShapKernel rejects missing values, so placeholders are used\n"
+        "  - SHAP input: ShapKernel rejects missing values, so placeholders are used\n"
         "    ONLY inside the explainer's inputs: missing category code -> -1, missing\n"
         "    days_since_last_activity / mean_score_available -> -999. The wrapper converts them\n"
         "    back to genuine missing values before predict_calibrated; no real value equals a\n"

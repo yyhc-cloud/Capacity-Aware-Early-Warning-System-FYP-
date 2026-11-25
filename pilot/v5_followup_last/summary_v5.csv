@@ -1,0 +1,7 @@
+method,reached_w2,reached_w4,reached_w6,n_at_risk,contacts,contacts_at_risk,fp_contacts,reviews,reviews_at_risk,new_reviews,new_reviews_at_risk,followup_reviews,followup_reviews_at_risk,followup_w4,followup_w4_at_risk,followup_w6,followup_w6_at_risk,followup_no_place_rows,followup_no_place_enrolments,none,none_not_reached,unc,unc_r,cap,cap_r,comb,comb_r,never,never_r,total_reached,unserved
+Rule-based alerts,48,101,133,2480,125,91,34,75,57,75,57,0,0,0,0,0,0,0,0,73,0,0,0,1394,60,0,0,1013,0,133,0
+HGB Top-K,67,124,163,2480,125,108,17,75,66,75,66,0,0,0,0,0,0,0,0,163,0,0,0,0,0,0,0,2317,0,163,0
+Probability-threshold deferral,67,124,163,2480,125,108,17,75,66,75,66,0,0,0,0,0,0,0,0,67,0,12,12,689,77,539,7,1173,0,163,809
+Conformal without persistence,61,116,152,2480,125,108,17,75,45,75,45,0,0,0,0,0,0,129,88,62,0,4,4,1515,84,295,2,604,0,152,1161
+Conformal without separate Waiting,61,116,152,2480,125,108,17,75,45,75,45,0,0,0,0,0,0,129,88,62,0,4,4,1515,84,588,2,311,0,152,0
+Proposed policy,61,116,152,2480,125,108,17,75,45,75,45,0,0,0,0,0,0,129,88,62,0,4,4,1515,84,588,2,311,0,152,1750

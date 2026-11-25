@@ -4,7 +4,7 @@ Data-handling note:
   An early exploratory check displayed label and group counts across all partitions;
   these were not used in any modelling decision.
 
-Decisions not covered by the original rules:
+Implementation decisions:
   - Features entirely missing in the fit rows at a checkpoint are dropped at that
     checkpoint (decided from fit only; constant features kept). See dropped_features.csv.
   - pcal split: StratifiedGroupKFold(3); the three folds' test sets, in the order the
@@ -19,7 +19,7 @@ Decisions not covered by the original rules:
     Test-scope estimate uses round(0.15 x 9,353) = 1,403 cases.
   - SHAP timing: explain_local time only; explainer set-up timed separately and not
     included in the estimates. KernelExplainer nsamples left at shap default.
-  - SHAP input (approved): ShapKernel rejects missing values, so placeholders are used
+  - SHAP input: ShapKernel rejects missing values, so placeholders are used
     ONLY inside the explainer's inputs: missing category code -> -1, missing
     days_since_last_activity / mean_score_available -> -999. The wrapper converts them
     back to genuine missing values before predict_calibrated; no real value equals a
